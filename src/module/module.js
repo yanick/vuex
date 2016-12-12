@@ -40,6 +40,20 @@ export default class Module {
     }
   }
 
+  setPluginUnregister(returnValues) {
+      return this._pluginUnregister = returnValues.filter( v => typeof v === 'function' );
+  }
+
+  getPluginUnregister() {
+      return this._pluginUnregister;
+  }
+
+  unregisterPlugins() {
+      if( this._pluginUnregister ) {
+        this._pluginUnregister.forEach( p => p() );
+      }
+  }
+
   forEachChild (fn) {
     forEachValue(this._children, fn)
   }
@@ -60,5 +74,11 @@ export default class Module {
     if (this._rawModule.mutations) {
       forEachValue(this._rawModule.mutations, fn)
     }
+  }
+
+  forEachPlugin (fn) {
+      if (this._rawModule.plugins) {
+          this._rawModule.plugins.forEach( fn );
+      }
   }
 }

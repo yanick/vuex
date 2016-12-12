@@ -145,6 +145,9 @@ class Store {
   unregisterModule (path) {
     if (typeof path === 'string') path = [path]
     assert(Array.isArray(path), `module path must be a string or an Array.`)
+
+    this._modules.get(path).unregisterPlugins();
+
     this._modules.unregister(path)
     this._withCommit(() => {
       const parentState = getNestedState(this.state, path.slice(0, -1))
@@ -248,6 +251,10 @@ function installModule (store, rootState, path, module, hot) {
     const namespacedType = namespace + key
     registerGetter(store, namespacedType, getter, local, path)
   })
+
+  if ( module._rawModule.plugins ) {
+      module.setPluginUnregister( module._rawModule.plugins.map( p => p(store) ) );
+  }
 
   module.forEachChild((child, key) => {
     installModule(store, rootState, path.concat(key), child, hot)
